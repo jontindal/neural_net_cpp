@@ -16,6 +16,8 @@ class NeuralNetwork {
 
         std::vector<double> forward_prop(std::vector<unsigned char> input_pixels);
 
+        double cost_function(unsigned char actual_value, std::vector<double> result);
+
     private:
         ReLU activation_class;
 

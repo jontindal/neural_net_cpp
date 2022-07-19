@@ -63,3 +63,17 @@ std::vector<double> NeuralNetwork::forward_prop(std::vector<unsigned char> input
 
     return a2;
 }
+
+double NeuralNetwork::cost_function(unsigned char actual_value, std::vector<double> result) {
+    assert (result.size() == OUTPUT_SIZE);
+
+    std::vector<double> desired_output(OUTPUT_SIZE, 0);
+    desired_output.at(actual_value) = 1;
+
+    double cost_sum = 0;
+    for (int i = 0; i < OUTPUT_SIZE; i++) {
+        cost_sum += pow((desired_output.at(i) - result.at(i)), 2);
+    }
+
+    return cost_sum;
+}
