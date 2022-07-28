@@ -10,8 +10,6 @@ constexpr size_t INPUT_SIZE = 784;
 constexpr size_t LAYER_ONE_SIZE = 10;
 constexpr size_t OUTPUT_SIZE = 10;
 
-std::vector<double> softmax(std::vector<double> inputs);
-
 struct neural_net_output_t {
     std::vector<std::vector<double>> z_results;
     std::vector<std::vector<double>> a_results;

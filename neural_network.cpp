@@ -1,23 +1,6 @@
 #include "neural_network.hpp"
 
-#include <cmath>
 #include <cassert>
-
-std::vector<double> softmax(std::vector<double> inputs) {
-    double sum = 0;
-    std::vector<double> results(inputs.size(), 0);
-    for (unsigned int i = 0; i < inputs.size(); i++) {
-        double exp_value = exp(inputs.at(i));
-        results.at(i) = exp_value;
-        sum += exp_value;
-    }
-
-    for (auto& i : results) {
-        i = i / sum;
-    }
-
-    return results;
-}
 
 NeuralNetwork::NeuralNetwork(activation_func_t activation_func, activation_func_deriv_t activation_func_deriv,
                              std::vector<size_t> hidden_layer_sizes, int alpha):
