@@ -6,7 +6,7 @@ OBJS=$(subst .cpp,.o,$(SRCS))
 
 all: main
 
-release: CPPFLAGS=-O2
+release: CPPFLAGS=-O2 -DNDEBUG
 release: main
 
 main: $(OBJS) main.cpp
