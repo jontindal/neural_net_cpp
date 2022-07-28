@@ -1,3 +1,5 @@
+#include "initialization_function.hpp"
+#include "activation_function.hpp"
 #include "data_reader.hpp"
 #include "neural_network.hpp"
 
@@ -5,20 +7,8 @@
 
 int main() {
     auto data_reader = DataReader("train.csv");
-    auto neural_net = NeuralNetwork();
+    std::vector<size_t> layers {10};
+    auto neural_net = NeuralNetwork(ReLU, deriv_ReLU, layers, 0.1);
 
-    for (int i=0; i<1; i++) {
-        training_data_t data = data_reader.get_data_point();
-        std::cout << (int) data.actual_value << "\n";
-
-        std::vector<double> result = neural_net.forward_prop(data.pixels).a2;
-
-        for (auto i : result) {
-            std::cout << i << ", ";
-        }
-        std::cout << "\n";
-
-        std::cout << "Cost = " << neural_net.cost_function(data.actual_value, result) << "\n";
-    }
     return 0;
 }
