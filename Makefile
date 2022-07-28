@@ -1,5 +1,5 @@
 CXX=g++
-CPPFLAGS=-g -Wall
+CPPFLAGS=-g -Wall -D_GLIBCXX_DEBUG
 
 SRCS=activation_function.cpp data_reader.cpp neural_network.cpp
 OBJS=$(subst .cpp,.o,$(SRCS))
