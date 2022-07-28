@@ -1,6 +1,8 @@
 #include "neural_network.hpp"
 
 #include <cassert>
+#include <algorithm>
+#include <functional>
 #include <numeric>
 
 NeuralNetwork::NeuralNetwork(activation_func_t activation_func, activation_func_deriv_t activation_func_deriv,
@@ -25,7 +27,7 @@ NeuralNetwork::NeuralNetwork(activation_func_t activation_func, activation_func_
         }
     }
 
-neural_net_output_t NeuralNetwork::forward_prop(const std::vector<double> input_pixels) {
+neural_net_output_t NeuralNetwork::forward_prop(const std::vector<double>& input_pixels) {
     assert (input_pixels.size() == INPUT_SIZE);
 
     neural_net_output_t result;
@@ -39,6 +41,7 @@ neural_net_output_t NeuralNetwork::forward_prop(const std::vector<double> input_
         for (unsigned int j = 0; j < INPUT_SIZE; j++) {
             assert (weights[i][j].size() == result.a_results.back().size());
             z_result[j] = inner_product(weights[i][j].begin(), weights[i][j].end(), result.a_results.back().begin(), 0);
+            z_result[j] += biases[i][j];
         }
 
         std::vector<double> a_result = layer_activation_func(z_result);
@@ -50,16 +53,17 @@ neural_net_output_t NeuralNetwork::forward_prop(const std::vector<double> input_
     return result;
 }
 
-// double NeuralNetwork::cost_function(unsigned char actual_value, std::vector<double> result) {
-//     assert (result.size() == OUTPUT_SIZE);
+std::vector<double> cost_function_deriv(unsigned char expected_result, const std::vector<double>& actual_results) {
+    assert (expected_result < actual_results.size());
 
-//     std::vector<double> desired_output(OUTPUT_SIZE, 0);
-//     desired_output.at(actual_value) = 1;
+    std::vector<double> one_hot_expected_results(actual_results.size(), 0);
+    one_hot_expected_results[expected_result] = 1;
 
-//     double cost_sum = 0;
-//     for (int i = 0; i < OUTPUT_SIZE; i++) {
-//         cost_sum += pow((desired_output.at(i) - result.at(i)), 2);
-//     }
+    std::vector<double> results(actual_results.size(), 0);
 
-//     return cost_sum;
-// }
+    std::transform(actual_results.begin(), actual_results.end(), one_hot_expected_results.begin(),
+                   results.begin(),
+                   [](double val_0, double val_1) { return 2 * (val_0 - val_1); });
+
+    return results;
+}
