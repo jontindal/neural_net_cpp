@@ -33,7 +33,7 @@ neural_net_output_t NeuralNetwork::forward_prop(const std::vector<double> input_
     result.a_results.push_back(input_pixels);
 
     for (int i = 0; i < number_layers; i++) {
-        bool is_last_layer = (i == number_layers - 1);
+        activation_func_t layer_activation_func = (i == number_layers - 1) ? softmax : activation_func;
 
         std::vector<double> z_result(INPUT_SIZE, 0);
         for (unsigned int j = 0; j < INPUT_SIZE; j++) {
@@ -41,11 +41,7 @@ neural_net_output_t NeuralNetwork::forward_prop(const std::vector<double> input_
             z_result[j] = inner_product(weights[i][j].begin(), weights[i][j].end(), result.a_results.back().begin(), 0);
         }
 
-        if (is_last_layer) {
-            std::vector<double> a_result = softmax(z_result);
-        } else {
-            std::vector<double> a_result = activation_func(z_result);
-        }
+        std::vector<double> a_result = layer_activation_func(z_result);
 
         result.z_results.push_back(z_result);
         result.a_results.push_back(a_result);
