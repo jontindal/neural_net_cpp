@@ -2,40 +2,41 @@
 #define NEURAL_NETWORK_HPP
 
 #include <vector>
+
+#include "initialization_function.hpp"
 #include "activation_function.hpp"
 
-constexpr int INPUT_SIZE = 784;
-constexpr int LAYER_ONE_SIZE = 10;
-constexpr int OUTPUT_SIZE = 10;
+constexpr size_t INPUT_SIZE = 784;
+constexpr size_t LAYER_ONE_SIZE = 10;
+constexpr size_t OUTPUT_SIZE = 10;
 
 std::vector<double> softmax(std::vector<double> inputs);
 
 struct neural_net_output_t {
-    std::vector<double> a1;
-    std::vector<double> a2;
-
-    neural_net_output_t():
-    a1(LAYER_ONE_SIZE, 0),
-    a2(OUTPUT_SIZE, 0)
-    {}
+    std::vector<std::vector<double>> z_results;
+    std::vector<std::vector<double>> a_results;
 };
 
 class NeuralNetwork {
     public:
-        NeuralNetwork();
+        NeuralNetwork(activation_func_t activation_func, activation_func_deriv_t activation_func_deriv,
+                      std::vector<size_t> hidden_layer_sizes, int alpha);
 
         neural_net_output_t forward_prop(std::vector<unsigned char> input_pixels);
 
-        double cost_function(unsigned char actual_value, std::vector<double> result);
+        // double cost_function(unsigned char actual_value, std::vector<double> result);
 
     private:
-        ReLU activation_class;
+        const int number_layers;
+        const int alpha;
 
-        std::vector<std::vector<double>> w1;
-        std::vector<double> b1;
+        const std::vector<size_t> hidden_layer_sizes;
 
-        std::vector<std::vector<double>> w2;
-        std::vector<double> b2;
+        activation_func_t activation_func;
+        activation_func_deriv_t activation_func_deriv;
+
+        std::vector<std::vector<std::vector<double>>> weights;
+        std::vector<std::vector<double>> biases;
 };
 
 #endif
