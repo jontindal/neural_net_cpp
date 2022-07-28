@@ -10,11 +10,21 @@ constexpr int OUTPUT_SIZE = 10;
 
 std::vector<double> softmax(std::vector<double> inputs);
 
+struct neural_net_output_t {
+    std::vector<double> a1;
+    std::vector<double> a2;
+
+    neural_net_output_t():
+    a1(LAYER_ONE_SIZE, 0),
+    a2(OUTPUT_SIZE, 0)
+    {}
+};
+
 class NeuralNetwork {
     public:
         NeuralNetwork();
 
-        std::vector<double> forward_prop(std::vector<unsigned char> input_pixels);
+        neural_net_output_t forward_prop(std::vector<unsigned char> input_pixels);
 
         double cost_function(unsigned char actual_value, std::vector<double> result);
 

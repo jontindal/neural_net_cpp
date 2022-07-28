@@ -11,7 +11,7 @@ int main() {
         training_data_t data = data_reader.get_data_point();
         std::cout << (int) data.actual_value << "\n";
 
-        std::vector<double> result = neural_net.forward_prop(data.pixels);
+        std::vector<double> result = neural_net.forward_prop(data.pixels).a2;
 
         for (auto i : result) {
             std::cout << i << ", ";

@@ -26,8 +26,10 @@ NeuralNetwork::NeuralNetwork():
     b2(OUTPUT_SIZE, 0)
     {}
 
-std::vector<double> NeuralNetwork::forward_prop(std::vector<unsigned char> input_pixels) {
+neural_net_output_t NeuralNetwork::forward_prop(std::vector<unsigned char> input_pixels) {
     assert (input_pixels.size() == INPUT_SIZE);
+
+    neural_net_output_t result;
 
     std::vector<double> z1(LAYER_ONE_SIZE, 0);
 
@@ -44,14 +46,14 @@ std::vector<double> NeuralNetwork::forward_prop(std::vector<unsigned char> input
     std::vector<double> a1(LAYER_ONE_SIZE, 0);
 
     for (int i = 0; i < LAYER_ONE_SIZE; i++) {
-        a1.at(i) = activation_class.activation_func(z1.at(i));
+        result.a1.at(i) = activation_class.activation_func(z1.at(i));
     }
 
     std::vector<double> z2(OUTPUT_SIZE, 0);
 
     for (int i = 0; i < LAYER_ONE_SIZE; i++) {
         for (int j = 0; j < OUTPUT_SIZE; j++) {
-            z2.at(j) += a1.at(i) * w2.at(i).at(j);
+            z2.at(j) += result.a1.at(i) * w2.at(i).at(j);
         }
     }
 
@@ -59,9 +61,9 @@ std::vector<double> NeuralNetwork::forward_prop(std::vector<unsigned char> input
         z2.at(i) += b2.at(i);
     }
 
-    std::vector<double> a2 = softmax(z2);
+    result.a2 = softmax(z2);
 
-    return a2;
+    return result;
 }
 
 double NeuralNetwork::cost_function(unsigned char actual_value, std::vector<double> result) {
