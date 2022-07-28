@@ -1,6 +1,7 @@
 #include "neural_network.hpp"
 
 #include <cassert>
+#include <numeric>
 
 NeuralNetwork::NeuralNetwork(activation_func_t activation_func, activation_func_deriv_t activation_func_deriv,
                              std::vector<size_t> hidden_layer_sizes, int alpha):
@@ -16,22 +17,38 @@ NeuralNetwork::NeuralNetwork(activation_func_t activation_func, activation_func_
         total_layers.insert(total_layers.end(), OUTPUT_SIZE);
 
         for (unsigned int i = 0; i < total_layers.size() - 1; i++) {
-            std::vector<std::vector<double>> weights_matrix(total_layers[i], std::vector<double>(total_layers[i + 1], 0));
+            std::vector<std::vector<double>> weights_matrix(total_layers[i + 1], std::vector<double>(total_layers[i], 0));
             weights.push_back(weights_matrix);
 
             std::vector<double> biases_array(total_layers[i + 1], 0);
+            biases.push_back(biases_array);
         }
     }
 
-neural_net_output_t NeuralNetwork::forward_prop(std::vector<unsigned char> input_pixels) {
+neural_net_output_t NeuralNetwork::forward_prop(const std::vector<double> input_pixels) {
     assert (input_pixels.size() == INPUT_SIZE);
 
     neural_net_output_t result;
+    result.z_results.push_back(std::vector<double>());
+    result.a_results.push_back(input_pixels);
 
     for (int i = 0; i < number_layers; i++) {
         bool is_last_layer = (i == number_layers - 1);
 
+        std::vector<double> z_result(INPUT_SIZE, 0);
+        for (unsigned int j = 0; j < INPUT_SIZE; j++) {
+            assert (weights[i][j].size() == result.a_results.back().size());
+            z_result[j] = inner_product(weights[i][j].begin(), weights[i][j].end(), result.a_results.back().begin(), 0);
+        }
 
+        if (is_last_layer) {
+            std::vector<double> a_result = softmax(z_result);
+        } else {
+            std::vector<double> a_result = activation_func(z_result);
+        }
+
+        result.z_results.push_back(z_result);
+        result.a_results.push_back(a_result);
     }
 
     return result;

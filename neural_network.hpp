@@ -20,7 +20,7 @@ class NeuralNetwork {
         NeuralNetwork(activation_func_t activation_func, activation_func_deriv_t activation_func_deriv,
                       std::vector<size_t> hidden_layer_sizes, int alpha);
 
-        neural_net_output_t forward_prop(std::vector<unsigned char> input_pixels);
+        neural_net_output_t forward_prop(std::vector<double> input_pixels);
 
         // double cost_function(unsigned char actual_value, std::vector<double> result);
 
