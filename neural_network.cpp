@@ -3,15 +3,18 @@
 #include <cassert>
 #include <algorithm>
 #include <numeric>
+#include <random>
 
 #include "math_utils.hpp"
 
-NeuralNetwork::NeuralNetwork(activation_func_t activation_func, activation_func_deriv_t activation_func_deriv,
-                             std::vector<size_t> hidden_layer_sizes, double alpha):
+NeuralNetwork::NeuralNetwork(std::vector<size_t> hidden_layer_sizes, initialization_func_t initialization_func,
+                             activation_func_t activation_func, activation_func_deriv_t activation_func_deriv,
+                             double alpha):
                              number_layers(hidden_layer_sizes.size() + 1),
                              alpha(alpha),
                              hidden_layer_sizes(hidden_layer_sizes) {
         
+    this->initialization_func = initialization_func;
     this->activation_func = activation_func;
     this->activation_func_deriv = activation_func_deriv;
 
@@ -19,8 +22,10 @@ NeuralNetwork::NeuralNetwork(activation_func_t activation_func, activation_func_
     total_layers.insert(total_layers.begin(), INPUT_SIZE);
     total_layers.insert(total_layers.end(), OUTPUT_SIZE);
 
+    std::default_random_engine generator;
+
     for (unsigned int i = 0; i < total_layers.size() - 1; i++) {
-        std::vector<std::vector<double>> weights_matrix(total_layers[i + 1], std::vector<double>(total_layers[i], 0));
+        std::vector<std::vector<double>> weights_matrix = he_initialization(generator, total_layers[i], total_layers[i + 1]);
         weights.push_back(weights_matrix);
 
         std::vector<double> biases_array(total_layers[i + 1], 0);

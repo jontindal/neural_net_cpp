@@ -1,7 +1,7 @@
 CXX=g++
 CPPFLAGS=-g -Wall -D_GLIBCXX_DEBUG
 
-SRCS=activation_function.cpp data_reader.cpp neural_network.cpp test_funcs.cpp
+SRCS=initialization_function.cpp activation_function.cpp data_reader.cpp neural_network.cpp test_funcs.cpp
 OBJS=$(subst .cpp,.o,$(SRCS))
 
 all: main

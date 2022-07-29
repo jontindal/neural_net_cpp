@@ -8,7 +8,7 @@
 int main() {
     auto data_reader = DataReader("train.csv");
     std::vector<size_t> layers {10};
-    auto neural_net = NeuralNetwork(ReLU, deriv_ReLU, layers, 0.1);
+    auto neural_net = NeuralNetwork(layers, he_initialization, ReLU, deriv_ReLU, 0.1);
 
     return 0;
 }

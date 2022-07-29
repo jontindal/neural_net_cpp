@@ -15,7 +15,7 @@ bool test_layer_sizes() {
     for (int i = 13; i > 10; i--) {
         layers.push_back(i);
         
-        auto neural_net = NeuralNetwork(ReLU, deriv_ReLU, layers, 0.1);
+        auto neural_net = NeuralNetwork(layers, he_initialization, ReLU, deriv_ReLU, 0.1);
 
         std::vector<size_t> total_layers = layers;
         total_layers.insert(total_layers.begin(), INPUT_SIZE);
@@ -51,7 +51,7 @@ bool test_forward_prop() {
     for (int i = 13; i > 10; i--) {
         layers.push_back(i);
 
-        auto neural_net = NeuralNetwork(ReLU, deriv_ReLU, layers, 0.1);
+        auto neural_net = NeuralNetwork(layers, he_initialization, ReLU, deriv_ReLU, 0.1);
 
         auto results = neural_net.forward_prop(input_pixels);
 

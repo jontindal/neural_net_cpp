@@ -3,15 +3,8 @@
 
 #include <random>
 
-class HeInitialization {
-    public:
-        HeInitialization(double prev_layer_size, double next_layer_size);
+typedef std::vector<std::vector<double>> (*initialization_func_t)(std::default_random_engine generator, size_t prev_layer_size, size_t next_layer_size);
 
-        double get_value();
-
-    private:
-        std::default_random_engine generator;
-        std::normal_distribution<double> distribution;
-};
+std::vector<std::vector<double>> he_initialization(std::default_random_engine generator, size_t prev_layer_size, size_t next_layer_size);
 
 #endif

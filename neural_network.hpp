@@ -22,8 +22,9 @@ struct back_prop_output_t {
 
 class NeuralNetwork {
     public:
-        NeuralNetwork(activation_func_t activation_func, activation_func_deriv_t activation_func_deriv,
-                      std::vector<size_t> hidden_layer_sizes, double alpha);
+        NeuralNetwork(std::vector<size_t> hidden_layer_sizes, initialization_func_t initialization_func,
+                      activation_func_t activation_func, activation_func_deriv_t activation_func_deriv,
+                      double alpha);
 
         const std::vector<std::vector<std::vector<double>>> get_weights();
 
@@ -42,6 +43,7 @@ class NeuralNetwork {
 
         const std::vector<size_t> hidden_layer_sizes;
 
+        initialization_func_t initialization_func;
         activation_func_t activation_func;
         activation_func_deriv_t activation_func_deriv;
 

@@ -1,9 +1,16 @@
 #include "initialization_function.hpp"
 
-HeInitialization::HeInitialization(double prev_layer_size, double next_layer_size):
-    distribution(0, sqrt(2 / prev_layer_size)) {}
+std::vector<std::vector<double>> he_initialization(std::default_random_engine generator, size_t prev_layer_size, size_t next_layer_size) {
+    std::vector<std::vector<double>> result(next_layer_size, std::vector<double>(prev_layer_size, 0));
 
-double const HeInitialization::get_value() {
-    return distribution(generator);
+    std::normal_distribution<double> distribution(0.0, sqrt((double)2 / prev_layer_size));
+
+    for (auto& row : result) {
+        for (auto& value : row) {
+            value = distribution(generator);
+        }
+    }
+
+    return result;
 }
     
