@@ -18,12 +18,16 @@ struct forward_prop_output_t {
 struct back_prop_output_t {
     std::vector<std::vector<std::vector<double>>> dw_results;
     std::vector<std::vector<double>> db_results;
-}
+};
 
 class NeuralNetwork {
     public:
         NeuralNetwork(activation_func_t activation_func, activation_func_deriv_t activation_func_deriv,
                       std::vector<size_t> hidden_layer_sizes, double alpha);
+
+        const std::vector<std::vector<std::vector<double>>> get_weights();
+
+        const std::vector<std::vector<double>> get_biases();
 
         forward_prop_output_t forward_prop(const std::vector<double>& input_pixels);
 

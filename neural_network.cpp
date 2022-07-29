@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <numeric>
 
+#include "math_utils.hpp"
+
 NeuralNetwork::NeuralNetwork(activation_func_t activation_func, activation_func_deriv_t activation_func_deriv,
                              std::vector<size_t> hidden_layer_sizes, double alpha):
                              number_layers(hidden_layer_sizes.size() + 1),
@@ -26,6 +28,14 @@ NeuralNetwork::NeuralNetwork(activation_func_t activation_func, activation_func_
     }
 }
 
+const std::vector<std::vector<std::vector<double>>> NeuralNetwork::get_weights() {
+    return weights;
+}
+
+const std::vector<std::vector<double>> NeuralNetwork::get_biases() {
+    return biases;
+}
+
 forward_prop_output_t NeuralNetwork::forward_prop(const std::vector<double>& input_pixels) {
     assert (input_pixels.size() == INPUT_SIZE);
 
@@ -36,8 +46,8 @@ forward_prop_output_t NeuralNetwork::forward_prop(const std::vector<double>& inp
     for (int i = 0; i < number_layers; i++) {
         activation_func_t layer_activation_func = (i == number_layers - 1) ? softmax : activation_func;
 
-        std::vector<double> z_result(INPUT_SIZE, 0);
-        for (unsigned int j = 0; j < INPUT_SIZE; j++) {
+        std::vector<double> z_result(biases[i].size(), 0);
+        for (unsigned int j = 0; j < biases[i].size(); j++) {
             assert (weights[i][j].size() == result.a_results.back().size());
             z_result[j] = inner_product(weights[i][j].begin(), weights[i][j].end(), result.a_results.back().begin(), 0);
             z_result[j] += biases[i][j];
@@ -71,10 +81,13 @@ back_prop_output_t NeuralNetwork::back_prop(unsigned char expected_result, const
                                             const forward_prop_output_t& forward_prop_output) {
 
     std::vector<std::vector<double>> dz_results;
-    dz_results.push_back(cost_function_deriv(expected_result, actual_results));
+    dz_results.push_back(cost_function_deriv(expected_result, forward_prop_output.a_results.back()));
 
-    for (unsigned int i = 0; i < number_layers - 1; i++) {
-        std::vector<double> dz_result(forward_prop_output.dz_results[i].size(), 0);
+    for (int i = 0; i < number_layers - 1; i++) {
+        std::vector<double> dz_result = dot_product<true>(weights[i], dz_results.back());
+
+
+        
         dz_results.push_back(dz_result);
     }
 
