@@ -47,14 +47,19 @@ bool test_forward_prop() {
     auto input_pixels = get_input_pixels();
 
     std::vector<size_t> layers;
-    auto neural_net = NeuralNetwork(ReLU, deriv_ReLU, layers, 0.1);
 
-    auto results = neural_net.forward_prop(input_pixels);
+    for (int i = 13; i > 10; i--) {
+        layers.push_back(i);
 
-    auto other_results = forward_prop(neural_net.get_weights(), neural_net.get_biases(), input_pixels);
+        auto neural_net = NeuralNetwork(ReLU, deriv_ReLU, layers, 0.1);
 
-    test_failed |= (results.z_results != other_results.z_results);
-    test_failed |= (results.a_results != other_results.a_results);
+        auto results = neural_net.forward_prop(input_pixels);
+
+        auto other_results = forward_prop(neural_net.get_weights(), neural_net.get_biases(), input_pixels);
+
+        test_failed |= (results.z_results != other_results.z_results);
+        test_failed |= (results.a_results != other_results.a_results);
+    }
 
     return test_failed;
 }
