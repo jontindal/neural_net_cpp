@@ -1,5 +1,6 @@
 #include "test_funcs.hpp"
 
+#include <cassert>
 #include <random>
 
 #include "activation_function.hpp"
@@ -43,91 +44,84 @@ forward_prop_output_t forward_prop(std::vector<std::vector<std::vector<double>>>
     return result;
 }
 
-back_prop_output_t back_prop_one_layer(unsigned char expected_result, forward_prop_output_t forward_prop_output,
-                                       std::vector<std::vector<std::vector<double>>> weights) {
+static std::vector<double> get_dz_result(const std::vector<std::vector<double>> weights_matrix,
+                                         const std::vector<double> z_result,
+                                         const std::vector<double> next_layer_dz_result) {
 
-    std::vector<double> expected_results(OUTPUT_SIZE, 0);
-    expected_results[expected_result] = 1;
+    const size_t current_layer_size = z_result.size();
+    const size_t next_layer_size = next_layer_dz_result.size();
 
-    back_prop_output_t result;
+    assert (weights_matrix.size() == next_layer_size);
+    assert (weights_matrix.front().size() == current_layer_size);
 
-    std::vector<double> dz1(OUTPUT_SIZE, 0);
+    std::vector<double> dz_result(current_layer_size);
 
-    for (size_t i = 0; i < OUTPUT_SIZE; i++) {
-        dz1[i] = 2 * (expected_results[i] - forward_prop_output.a_results.back()[i]);
-    }
-
-    std::vector<std::vector<double>> dw1 = weights.back();
-
-    for (size_t i = 0; i < dw1.size(); i++) {
-        for (size_t j = 0; j < dw1[i].size(); j++) {
-            dw1[i][j] = dz1[i] * forward_prop_output.a_results.front()[j];
+    for (size_t i = 0; i < current_layer_size; i++) {
+        for (size_t j = 0; j < next_layer_size; j++) {
+            dz_result[i] += weights_matrix[j][i] * next_layer_dz_result[j];
         }
     }
 
-    std::vector<double> db1 = dz1;
+    std::vector<double> activation_func_deriv_result = deriv_ReLU(z_result);
 
-    
-    result.dw_results.push_back(dw1);
-    result.db_results.push_back(db1);
+    for (size_t i = 0; i < current_layer_size; i++) {
+        dz_result[i] *= activation_func_deriv_result[i];
+    }
 
-    return result;
+    return dz_result;
 }
 
-back_prop_output_t back_prop_two_layer(unsigned char expected_result, forward_prop_output_t forward_prop_output,
-                                       std::vector<std::vector<std::vector<double>>> weights) {
+static std::vector<std::vector<double>> get_all_dz_results(const size_t no_layers,
+                                                           const std::vector<std::vector<std::vector<double>>> weights,
+                                                           const std::vector<std::vector<double>> z_results,
+                                                           const std::vector<double> expected_results,
+                                                           const std::vector<double> actual_results) {
+    
+    std::vector<std::vector<double>> dz_results(no_layers);
+
+    std::vector<double> final_dz_result(expected_results.size());
+
+    for (size_t i = 0; i < expected_results.size(); i++) {
+        final_dz_result[i] = 2 * (expected_results[i] - actual_results[i]);
+    }
+
+    dz_results[no_layers - 1] = final_dz_result;
+
+    for (int layer_no = no_layers - 2; layer_no >= 0; layer_no--) {
+        dz_results[layer_no] = get_dz_result(weights[layer_no + 1], z_results[layer_no + 1], dz_results[layer_no + 1]);
+    }
+
+    return dz_results;
+}
+
+back_prop_output_t back_prop(unsigned char expected_result, forward_prop_output_t forward_prop_output,
+                             std::vector<std::vector<std::vector<double>>> weights) {
+
+    const size_t no_layers = weights.size();
+    assert (forward_prop_output.z_results.size() == no_layers + 1);
+    assert (forward_prop_output.a_results.size() == no_layers + 1);
 
     std::vector<double> expected_results(OUTPUT_SIZE, 0);
     expected_results[expected_result] = 1;
 
     back_prop_output_t result;
 
-    std::vector<double> dz2(OUTPUT_SIZE, 0);
+    auto dz_results = get_all_dz_results(no_layers, weights, forward_prop_output.z_results, expected_results, forward_prop_output.a_results.back());
 
-    for (size_t i = 0; i < OUTPUT_SIZE; i++) {
-        dz2[i] = 2 * (expected_results[i] - forward_prop_output.a_results.back()[i]);
-    }
+    for (size_t layer_no = 0; layer_no < no_layers; layer_no++) {
+        std::vector<std::vector<double>> dw_result(weights[layer_no].size(), std::vector<double>(weights[layer_no].front().size()));
 
-    size_t layer_1_size = forward_prop_output.a_results[1].size();
-    std::vector<double> dz1(layer_1_size, 0);
-
-    std::vector<double> z1_relu_deriv = deriv_ReLU(forward_prop_output.z_results[1]);
-
-    for (size_t i = 0; i < layer_1_size; i++) {
-        for (size_t j = 0; j < OUTPUT_SIZE; j++) {
-            dz1[i] += weights[1][j][i] * dz2[j];
+        for (size_t i = 0; i < dw_result.size(); i++) {
+            for (size_t j = 0; j < dw_result[i].size(); j++) {
+                dw_result[i][j] = dz_results[layer_no][i] * forward_prop_output.a_results[layer_no][j];
+            }
         }
+
+        std::vector<double> db_result = dz_results[layer_no];
+
+        result.dw_results.push_back(dw_result);
+        result.db_results.push_back(db_result);
     }
-
-    for (size_t i = 0; i < layer_1_size; i++) {
-        dz1[i] *= z1_relu_deriv[i];
-    }
-
-    std::vector<std::vector<double>> dw1 = weights[0];
-    
-    for (size_t i = 0; i < dw1.size(); i++) {
-        for (size_t j = 0; j < dw1[i].size(); j++) {
-            dw1[i][j] = dz1[i] * forward_prop_output.a_results[0][j];
-        }
-    }
-
-    std::vector<double> db1 = dz1;
-
-    result.dw_results.push_back(dw1);
-    result.db_results.push_back(db1);
-
-    std::vector<std::vector<double>> dw2 = weights[1];
-    
-    for (size_t i = 0; i < dw2.size(); i++) {
-        for (size_t j = 0; j < dw2[i].size(); j++) {
-            dw2[i][j] = dz2[i] * forward_prop_output.a_results[1][j];
-        }
-    }
-
-    std::vector<double> db2 = dz2;
-
-    result.dw_results.push_back(dw2);
-    result.db_results.push_back(db2);
 
     return result;    
 }
