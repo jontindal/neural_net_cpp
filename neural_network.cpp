@@ -75,7 +75,7 @@ std::vector<double> NeuralNetwork::cost_function_deriv(unsigned char expected_re
 
     std::vector<double> results(actual_results.size(), 0);
 
-    std::transform(actual_results.begin(), actual_results.end(), one_hot_expected_results.begin(),
+    std::transform(one_hot_expected_results.begin(), one_hot_expected_results.end(), actual_results.begin(),
                    results.begin(),
                    [](double val_0, double val_1) { return 2 * (val_0 - val_1); });
 
@@ -85,17 +85,33 @@ std::vector<double> NeuralNetwork::cost_function_deriv(unsigned char expected_re
 back_prop_output_t NeuralNetwork::back_prop(unsigned char expected_result, const std::vector<double>& input_pixels,
                                             const forward_prop_output_t& forward_prop_output) {
 
-    std::vector<std::vector<double>> dz_results;
-    dz_results.push_back(cost_function_deriv(expected_result, forward_prop_output.a_results.back()));
+    std::vector<std::vector<double>> dz_results(number_layers);
+    dz_results[number_layers - 1] = cost_function_deriv(expected_result, forward_prop_output.a_results.back());
 
-    for (int i = 0; i < number_layers - 1; i++) {
-        std::vector<double> dz_result = dot_product<true>(weights[i], dz_results.back());
+    for (int i = number_layers - 2; i > -1; i--) {
+        std::vector<double> dz_result = dot_product<true>(weights[i + 1], dz_results[i + 1]);
 
+        std::vector<double> temp = activation_func_deriv(forward_prop_output.z_results[i + 1]);
 
-        
-        dz_results.push_back(dz_result);
+        std::transform(dz_result.begin(), dz_result.end(), temp.begin(), dz_result.begin(),
+                       [](double val_0, double val_1) { return val_0 * val_1; });
+
+        dz_results[i] = dz_result;
     }
 
     back_prop_output_t result;
+
+    for (int i = 0; i < number_layers; i++) {
+        std::vector<std::vector<double>> dw_result(weights[i].size(), std::vector<double> (weights[i][0].size(), 0));
+
+        for (size_t j = 0; j < weights[i].size(); j++) {
+            for (size_t k = 0; k < weights[i][j].size(); k++) {
+                dw_result[j][k] = dz_results[i][j] * forward_prop_output.a_results[i][k];
+            }
+        }
+        result.dw_results.push_back(dw_result);
+        result.db_results.push_back(dz_results[i]);
+    }
+
     return result;
 }

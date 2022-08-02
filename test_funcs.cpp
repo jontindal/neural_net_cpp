@@ -51,7 +51,7 @@ back_prop_output_t back_prop(unsigned char expected_result, forward_prop_output_
 
     for (size_t i = 0; i < dw1.size(); i++) {
         for (size_t j = 0; j < dw1[i].size(); j++) {
-            dw1[i][j] = dz1[j] * forward_prop_output.a_results.front()[j];
+            dw1[i][j] = dz1[i] * forward_prop_output.a_results.front()[j];
         }
     }
 
