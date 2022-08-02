@@ -18,9 +18,9 @@ std::vector<double> get_input_pixels() {
     return input_pixels;
 }
 
-forward_prop_output_t forward_prop(std::vector<std::vector<std::vector<double>>> weights,
-                                   std::vector<std::vector<double>> biases,
-                                   std::vector<double> input_pixels) {
+forward_prop_output_t forward_prop(const std::vector<std::vector<std::vector<double>>> weights,
+                                   const std::vector<std::vector<double>> biases,
+                                   const std::vector<double> input_pixels) {
 
     forward_prop_output_t result;
 
@@ -94,8 +94,8 @@ static std::vector<std::vector<double>> get_all_dz_results(const size_t no_layer
     return dz_results;
 }
 
-back_prop_output_t back_prop(unsigned char expected_result, forward_prop_output_t forward_prop_output,
-                             std::vector<std::vector<std::vector<double>>> weights) {
+back_prop_output_t back_prop(const unsigned char expected_result, const forward_prop_output_t forward_prop_output,
+                             const std::vector<std::vector<std::vector<double>>> weights) {
 
     const size_t no_layers = weights.size();
     assert (forward_prop_output.z_results.size() == no_layers + 1);
