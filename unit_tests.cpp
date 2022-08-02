@@ -77,7 +77,28 @@ bool test_back_prop() {
 
     back_prop_output_t results = neural_net.back_prop(3, input_pixels, forward_prop_output);
 
-    back_prop_output_t other_results = back_prop(3, forward_prop_output, neural_net.get_weights());
+    back_prop_output_t other_results = back_prop_one_layer(3, forward_prop_output, neural_net.get_weights());
+
+    test_failed |= (results.dw_results != other_results.dw_results);
+    test_failed |= (results.db_results != other_results.db_results);
+
+    return test_failed;
+}
+
+bool test_back_prop_two_layer() {
+    bool test_failed = false;
+
+    auto input_pixels = get_input_pixels();
+
+    std::vector<size_t> layers {13};
+
+    auto neural_net = NeuralNetwork(layers, he_initialization, ReLU, deriv_ReLU, 0.1);
+
+    forward_prop_output_t forward_prop_output = neural_net.forward_prop(input_pixels);
+
+    back_prop_output_t results = neural_net.back_prop(3, input_pixels, forward_prop_output);
+
+    back_prop_output_t other_results = back_prop_two_layer(3, forward_prop_output, neural_net.get_weights());
 
     test_failed |= (results.dw_results != other_results.dw_results);
     test_failed |= (results.db_results != other_results.db_results);
@@ -89,6 +110,7 @@ int main() {
     std::cout << test_layer_sizes() << '\n';
     std::cout << test_forward_prop() << '\n';
     std::cout << test_back_prop() << '\n';
+    std::cout << test_back_prop_two_layer() << '\n';
 
     return 0;
 }

@@ -1,9 +1,19 @@
 #include "test_funcs.hpp"
 
+#include <random>
+
 #include "activation_function.hpp"
 
 std::vector<double> get_input_pixels() {
     std::vector<double> input_pixels(INPUT_SIZE);
+
+    std::default_random_engine generator;
+    std::uniform_real_distribution<double> uniform_distribution(0, 1);
+
+    for (auto& i : input_pixels) {
+        i = uniform_distribution(generator);
+    }
+
     return input_pixels;
 }
 
@@ -33,8 +43,8 @@ forward_prop_output_t forward_prop(std::vector<std::vector<std::vector<double>>>
     return result;
 }
 
-back_prop_output_t back_prop(unsigned char expected_result, forward_prop_output_t forward_prop_output,
-                             std::vector<std::vector<std::vector<double>>> weights) {
+back_prop_output_t back_prop_one_layer(unsigned char expected_result, forward_prop_output_t forward_prop_output,
+                                       std::vector<std::vector<std::vector<double>>> weights) {
 
     std::vector<double> expected_results(OUTPUT_SIZE, 0);
     expected_results[expected_result] = 1;
@@ -62,4 +72,62 @@ back_prop_output_t back_prop(unsigned char expected_result, forward_prop_output_
     result.db_results.push_back(db1);
 
     return result;
+}
+
+back_prop_output_t back_prop_two_layer(unsigned char expected_result, forward_prop_output_t forward_prop_output,
+                                       std::vector<std::vector<std::vector<double>>> weights) {
+
+    std::vector<double> expected_results(OUTPUT_SIZE, 0);
+    expected_results[expected_result] = 1;
+
+    back_prop_output_t result;
+
+    std::vector<double> dz2(OUTPUT_SIZE, 0);
+
+    for (size_t i = 0; i < OUTPUT_SIZE; i++) {
+        dz2[i] = 2 * (expected_results[i] - forward_prop_output.a_results.back()[i]);
+    }
+
+    size_t layer_1_size = forward_prop_output.a_results[1].size();
+    std::vector<double> dz1(layer_1_size, 0);
+
+    std::vector<double> z1_relu_deriv = deriv_ReLU(forward_prop_output.z_results[1]);
+
+    for (size_t i = 0; i < layer_1_size; i++) {
+        for (size_t j = 0; j < OUTPUT_SIZE; j++) {
+            dz1[i] += weights[1][j][i] * dz2[j];
+        }
+    }
+
+    for (size_t i = 0; i < layer_1_size; i++) {
+        dz1[i] *= z1_relu_deriv[i];
+    }
+
+    std::vector<std::vector<double>> dw1 = weights[0];
+    
+    for (size_t i = 0; i < dw1.size(); i++) {
+        for (size_t j = 0; j < dw1[i].size(); j++) {
+            dw1[i][j] = dz1[i] * forward_prop_output.a_results[0][j];
+        }
+    }
+
+    std::vector<double> db1 = dz1;
+
+    result.dw_results.push_back(dw1);
+    result.db_results.push_back(db1);
+
+    std::vector<std::vector<double>> dw2 = weights[1];
+    
+    for (size_t i = 0; i < dw2.size(); i++) {
+        for (size_t j = 0; j < dw2[i].size(); j++) {
+            dw2[i][j] = dz2[i] * forward_prop_output.a_results[1][j];
+        }
+    }
+
+    std::vector<double> db2 = dz2;
+
+    result.dw_results.push_back(dw2);
+    result.db_results.push_back(db2);
+
+    return result;    
 }
