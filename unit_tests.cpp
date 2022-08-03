@@ -1,4 +1,6 @@
-#include <iostream>
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include "doctest.h"
+
 #include <vector>
 
 #include "initialization_function.hpp"
@@ -7,92 +9,71 @@
 
 #include "test_funcs.hpp"
 
-bool test_layer_sizes() {
-    bool test_failed = false;
-
+TEST_CASE("test_layer_sizes") {
     std::vector<size_t> layers;
 
-    for (int i = 13; i > 10; i--) {
-        auto neural_net = NeuralNetwork(layers, he_initialization, ReLU, deriv_ReLU, 0.1);
+    SUBCASE("no_hidden_layers") {layers = {};}
+    SUBCASE("one_hidden_layer") {layers =  {13};}
+    SUBCASE("two_hidden_layers") {layers =  {13, 12};}
+    SUBCASE("three_hidden_layers") {layers =  {13, 12, 11};}
 
-        std::vector<size_t> total_layers = layers;
-        total_layers.insert(total_layers.begin(), INPUT_SIZE);
-        total_layers.push_back(OUTPUT_SIZE);
+    auto neural_net = NeuralNetwork(layers, he_initialization, ReLU, deriv_ReLU, 0.1);
 
-        test_failed |= (neural_net.get_weights().size() != total_layers.size() - 1);
+    std::vector<size_t> total_layers = layers;
+    total_layers.insert(total_layers.begin(), INPUT_SIZE);
+    total_layers.push_back(OUTPUT_SIZE);
 
-        for (size_t i = 1; i < neural_net.get_weights().size(); i++) {
-            test_failed |= (neural_net.get_weights()[i - 1].size() != total_layers[i]);
+    CHECK (neural_net.get_weights().size() == total_layers.size() - 1);
 
-            for (auto& col :  neural_net.get_weights()[i - 1]) {
-                test_failed |= (col.size() != total_layers[i - 1]);
-            }
+    for (size_t i = 1; i < neural_net.get_weights().size(); i++) {
+        CHECK (neural_net.get_weights()[i - 1].size() == total_layers[i]);
+
+        for (auto& col :  neural_net.get_weights()[i - 1]) {
+            CHECK (col.size() == total_layers[i - 1]);
         }
-
-        test_failed |= (neural_net.get_biases().size() != total_layers.size() - 1);
-
-        for (size_t i = 1; i < neural_net.get_biases().size(); i++) {
-            test_failed |= (neural_net.get_biases()[i - 1].size() != total_layers[i]);
-        }
-
-        layers.push_back(i);
     }
 
-    return test_failed;
+    CHECK (neural_net.get_biases().size() == total_layers.size() - 1);
+
+    for (size_t i = 1; i < neural_net.get_biases().size(); i++) {
+        CHECK (neural_net.get_biases()[i - 1].size() == total_layers[i]);
+    }
 }
 
-bool test_forward_prop() {
-    bool test_failed = false;
-
+TEST_CASE("test_forward_prop") {
     auto input_pixels = get_input_pixels();
 
     std::vector<size_t> layers;
 
-    for (int i = 13; i > 10; i--) {
-        auto neural_net = NeuralNetwork(layers, he_initialization, ReLU, deriv_ReLU, 0.1);
+    SUBCASE("no_hidden_layers") {layers = {};}
+    SUBCASE("one_hidden_layer") {layers =  {13};}
+    SUBCASE("two_hidden_layers") {layers =  {13, 12};}
+    SUBCASE("three_hidden_layers") {layers =  {13, 12, 11};}
 
-        auto results = neural_net.forward_prop(input_pixels);
+    auto neural_net = NeuralNetwork(layers, he_initialization, ReLU, deriv_ReLU, 0.1);
 
-        auto other_results = forward_prop(neural_net.get_weights(), neural_net.get_biases(), input_pixels);
+    auto results = neural_net.forward_prop(input_pixels);
 
-        test_failed |= (results.z_results != other_results.z_results);
-        test_failed |= (results.a_results != other_results.a_results);
+    auto other_results = forward_prop(neural_net.get_weights(), neural_net.get_biases(), input_pixels);
 
-        layers.push_back(i);
-    }
-
-    return test_failed;
+    CHECK (results.z_results == other_results.z_results);
+    CHECK (results.a_results == other_results.a_results);
 }
 
-bool test_back_prop() {
-    bool test_failed = false;
-
+TEST_CASE("test_back_prop") {
     auto input_pixels = get_input_pixels();
 
     std::vector<size_t> layers;
 
-    for (int i = 13; i > 10; i--) {
-        auto neural_net = NeuralNetwork(layers, he_initialization, ReLU, deriv_ReLU, 0.1);
+    SUBCASE("no_hidden_layers") {layers = {};}
+    SUBCASE("one_hidden_layer") {layers =  {13};}
+    SUBCASE("two_hidden_layers") {layers =  {13, 12};}
+    SUBCASE("three_hidden_layers") {layers =  {13, 12, 11};}
 
-        forward_prop_output_t forward_prop_output = neural_net.forward_prop(input_pixels);
+    auto neural_net = NeuralNetwork(layers, he_initialization, ReLU, deriv_ReLU, 0.1);
 
-        back_prop_output_t results = neural_net.back_prop(3, input_pixels, forward_prop_output);
+    forward_prop_output_t forward_prop_output = neural_net.forward_prop(input_pixels);
 
-        back_prop_output_t other_results = back_prop(3, forward_prop_output, neural_net.get_weights());
+    back_prop_output_t results = neural_net.back_prop(3, input_pixels, forward_prop_output);
 
-        test_failed |= (results.dw_results != other_results.dw_results);
-        test_failed |= (results.db_results != other_results.db_results);
-
-        layers.push_back(i);
-    }
-
-    return test_failed;
-}
-
-int main() {
-    std::cout << test_layer_sizes() << '\n';
-    std::cout << test_forward_prop() << '\n';
-    std::cout << test_back_prop() << '\n';
-
-    return 0;
-}
+   
