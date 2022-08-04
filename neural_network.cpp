@@ -169,7 +169,9 @@ void NeuralNetwork::update_params(const back_prop_output_t& back_prop_output) {
     }
 }
 
-std::vector<double> NeuralNetwork::gradient_descent(const std::vector<training_data_t> training_data, unsigned long iterations) {
+std::vector<double> NeuralNetwork::gradient_descent(const std::vector<training_data_t> training_data,
+                                                    unsigned long iterations,
+                                                    bool print_progress) {
     std::vector<double> accuracies(iterations);
 
     for (size_t i = 0; i < iterations; i++) {
@@ -182,18 +184,14 @@ std::vector<double> NeuralNetwork::gradient_descent(const std::vector<training_d
             back_prop_output_t back_prop_output = back_prop(data_point.actual_value, double_vector, forward_prop_output);
 
             avg_output.add_new_result(back_prop_output, (1. / training_data.size()));
-            // std::cout << "Actual value = " << (int) data_point.actual_value << "\tGuess = " << (int) get_best_guess(forward_prop_output.a_results.back()) << "\tResult: ";
-            // for (auto p : forward_prop_output.a_results.back()) {
-            //     std::cout << p << ", ";
-            // }
-            // std::cout << "\n";
+
             correct_guesses += (get_best_guess(forward_prop_output.a_results.back()) == data_point.actual_value) ? 1 : 0;
         }
 
         update_params(avg_output);
         accuracies[i] = (double) correct_guesses / training_data.size();
 
-        if (i % 20 == 0) {
+        if ((i % 20 == 0) && print_progress) {
             std::cout << "Accuracy on iteration " << i << ": " << accuracies[i] << "\n";
         }
     }

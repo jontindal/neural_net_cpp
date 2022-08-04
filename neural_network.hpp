@@ -46,7 +46,7 @@ class NeuralNetwork {
 
         void update_params(const back_prop_output_t& back_prop_output);
 
-        std::vector<double> gradient_descent(const std::vector<training_data_t> training_data, unsigned long iterations);
+        std::vector<double> gradient_descent(const std::vector<training_data_t> training_data, unsigned long iterations, bool print_progress = false);
 
     private:
         const int number_layers;

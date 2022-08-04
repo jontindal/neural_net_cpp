@@ -2,3 +2,4 @@ train.csv
 *.o
 main
 unit_tests
+perf_tests
