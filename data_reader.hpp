@@ -9,6 +9,8 @@ struct training_data_t {
     std::vector<unsigned char> pixels;
 };
 
+std::vector<double> to_double_vector(const std::vector<unsigned char>& input);
+
 class DataReader {
     public:
         DataReader(std::string file_name);

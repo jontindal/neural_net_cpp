@@ -2,6 +2,16 @@
 
 #include <sstream>
 
+std::vector<double> to_double_vector(const std::vector<unsigned char>& input) {
+    std::vector<double> result(input.size());
+
+    for (size_t i = 0; i < input.size(); i++) {
+        result[i] = (double) input[i] / 255;
+    }
+
+    return result;
+}
+
 DataReader::DataReader(std::string file_name) {
     data_file.open(file_name, std::ios::in);
 
