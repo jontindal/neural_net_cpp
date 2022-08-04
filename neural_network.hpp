@@ -5,6 +5,7 @@
 
 #include "initialization_function.hpp"
 #include "activation_function.hpp"
+#include "data_reader.hpp"
 
 constexpr size_t INPUT_SIZE = 784;
 constexpr size_t LAYER_ONE_SIZE = 10;
@@ -18,6 +19,10 @@ struct forward_prop_output_t {
 struct back_prop_output_t {
     std::vector<std::vector<std::vector<double>>> dw_results;
     std::vector<std::vector<double>> db_results;
+
+    back_prop_output_t(const std::vector<size_t>& hidden_layer_sizes);
+
+    void add_new_result(const back_prop_output_t& new_result, double scale_factor);
 };
 
 class NeuralNetwork {

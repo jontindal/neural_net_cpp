@@ -86,10 +86,9 @@ forward_prop_output_t NeuralNetwork::forward_prop(const std::vector<double>& inp
     for (int i = 0; i < number_layers; i++) {
         activation_func_t layer_activation_func = (i == number_layers - 1) ? softmax : activation_func;
 
-        std::vector<double> z_result(biases[i].size(), 0);
+        std::vector<double> z_result = dot_product<false>(weights[i], result.a_results.back());
         for (unsigned int j = 0; j < biases[i].size(); j++) {
             assert (weights[i][j].size() == result.a_results.back().size());
-            z_result[j] = inner_product(weights[i][j].begin(), weights[i][j].end(), result.a_results.back().begin(), 0);
             z_result[j] += biases[i][j];
         }
 
@@ -110,7 +109,7 @@ std::vector<double> NeuralNetwork::cost_function_deriv(unsigned char expected_re
 
     std::vector<double> results(actual_results.size(), 0);
 
-    std::transform(one_hot_expected_results.begin(), one_hot_expected_results.end(), actual_results.begin(),
+    std::transform(actual_results.begin(), actual_results.end(), one_hot_expected_results.begin(),
                    results.begin(),
                    [](double val_0, double val_1) { return 2 * (val_0 - val_1); });
 

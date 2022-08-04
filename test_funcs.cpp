@@ -31,7 +31,7 @@ forward_prop_output_t forward_prop(const std::vector<std::vector<std::vector<dou
         std::vector<double> z_result(biases[i].size(), 0);
         
         for (size_t j = 0; j < biases[i].size(); j++) {
-            z_result[j] = inner_product(weights[i][j].begin(), weights[i][j].end(), result.a_results.back().begin(), 0);
+            z_result[j] = inner_product(weights[i][j].begin(), weights[i][j].end(), result.a_results.back().begin(), 0.);
             z_result[j] += biases[i][j];
         }
 
@@ -82,7 +82,7 @@ static std::vector<std::vector<double>> get_all_dz_results(const size_t no_layer
     std::vector<double> final_dz_result(expected_results.size());
 
     for (size_t i = 0; i < expected_results.size(); i++) {
-        final_dz_result[i] = 2 * (expected_results[i] - actual_results[i]);
+        final_dz_result[i] = 2 * (actual_results[i] - expected_results[i]);
     }
 
     dz_results[no_layers - 1] = final_dz_result;
