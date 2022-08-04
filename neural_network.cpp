@@ -1,6 +1,7 @@
 #include "neural_network.hpp"
 
 #include <cassert>
+#include <iostream>
 #include <algorithm>
 #include <numeric>
 #include <random>
@@ -101,6 +102,10 @@ forward_prop_output_t NeuralNetwork::forward_prop(const std::vector<double>& inp
     return result;
 }
 
+unsigned char NeuralNetwork::get_best_guess(const std::vector<double>& forward_prop_final_result) {
+    return std::max_element(forward_prop_final_result.begin(), forward_prop_final_result.end()) - forward_prop_final_result.begin();
+}
+
 std::vector<double> NeuralNetwork::cost_function_deriv(unsigned char expected_result, const std::vector<double>& actual_results) {
     assert (expected_result < actual_results.size());
 
@@ -148,4 +153,50 @@ back_prop_output_t NeuralNetwork::back_prop(unsigned char expected_result, const
     }
 
     return result;
+}
+
+void NeuralNetwork::update_params(const back_prop_output_t& back_prop_output) {
+    for (int layer = 0; layer < number_layers; layer++) {
+        for (size_t i = 0; i < weights[layer].size(); i++) {
+            for (size_t j = 0; j < weights[layer][i].size(); j++) {
+                weights[layer][i][j] -= alpha * back_prop_output.dw_results[layer][i][j];
+            }
+        }
+
+        for (size_t i = 0; i < biases[layer].size(); i++) {
+            biases[layer][i] -= alpha * back_prop_output.db_results[layer][i];
+        }
+    }
+}
+
+std::vector<double> NeuralNetwork::gradient_descent(const std::vector<training_data_t> training_data, unsigned long iterations) {
+    std::vector<double> accuracies(iterations);
+
+    for (size_t i = 0; i < iterations; i++) {
+        size_t correct_guesses = 0;
+        back_prop_output_t avg_output(hidden_layer_sizes);
+
+        for (auto& data_point : training_data) {
+            auto double_vector = to_double_vector(data_point.pixels);
+            forward_prop_output_t forward_prop_output = forward_prop(double_vector);
+            back_prop_output_t back_prop_output = back_prop(data_point.actual_value, double_vector, forward_prop_output);
+
+            avg_output.add_new_result(back_prop_output, (1. / training_data.size()));
+            // std::cout << "Actual value = " << (int) data_point.actual_value << "\tGuess = " << (int) get_best_guess(forward_prop_output.a_results.back()) << "\tResult: ";
+            // for (auto p : forward_prop_output.a_results.back()) {
+            //     std::cout << p << ", ";
+            // }
+            // std::cout << "\n";
+            correct_guesses += (get_best_guess(forward_prop_output.a_results.back()) == data_point.actual_value) ? 1 : 0;
+        }
+
+        update_params(avg_output);
+        accuracies[i] = (double) correct_guesses / training_data.size();
+
+        if (i % 20 == 0) {
+            std::cout << "Accuracy on iteration " << i << ": " << accuracies[i] << "\n";
+        }
+    }
+
+    return accuracies;
 }
