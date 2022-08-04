@@ -22,4 +22,4 @@ unit_tests: $(OBJS) unit_tests.cpp
 	$(CXX) $(CPPFLAGS) -c $<
 
 clean:
-	rm $(OBJS) main unit_tests
+	rm -f $(OBJS) main unit_tests
