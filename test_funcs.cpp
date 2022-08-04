@@ -95,6 +95,7 @@ static std::vector<std::vector<double>> get_all_dz_results(const size_t no_layer
 }
 
 back_prop_output_t back_prop(const unsigned char expected_result, const forward_prop_output_t forward_prop_output,
+                             const std::vector<size_t> hidden_layer_sizes,
                              const std::vector<std::vector<std::vector<double>>> weights) {
 
     const size_t no_layers = weights.size();
@@ -104,7 +105,7 @@ back_prop_output_t back_prop(const unsigned char expected_result, const forward_
     std::vector<double> expected_results(OUTPUT_SIZE, 0);
     expected_results[expected_result] = 1;
 
-    back_prop_output_t result;
+    back_prop_output_t result(hidden_layer_sizes);
 
     auto dz_results = get_all_dz_results(no_layers, weights, forward_prop_output.z_results, expected_results, forward_prop_output.a_results.back());
 
@@ -119,8 +120,8 @@ back_prop_output_t back_prop(const unsigned char expected_result, const forward_
 
         std::vector<double> db_result = dz_results[layer_no];
 
-        result.dw_results.push_back(dw_result);
-        result.db_results.push_back(db_result);
+        result.dw_results[layer_no] = dw_result;
+        result.db_results[layer_no] = db_result;
     }
 
     return result;    

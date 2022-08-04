@@ -7,6 +7,41 @@
 
 #include "math_utils.hpp"
 
+back_prop_output_t::back_prop_output_t(const std::vector<size_t>& hidden_layer_sizes) {
+    std::vector<size_t> total_layers = hidden_layer_sizes;
+    total_layers.insert(total_layers.begin(), INPUT_SIZE);
+    total_layers.insert(total_layers.end(), OUTPUT_SIZE);
+
+    for (unsigned int i = 0; i < total_layers.size() - 1; i++) {
+        std::vector<std::vector<double>> dw_matrix(total_layers[i + 1], std::vector<double>(total_layers[i], 0));
+        dw_results.push_back(dw_matrix);
+
+        std::vector<double> db_array(total_layers[i + 1], 0);
+        db_results.push_back(db_array);
+    }
+}
+
+void back_prop_output_t::add_new_result(const back_prop_output_t& new_result, double scale_factor) {
+    assert (dw_results.size() == new_result.dw_results.size());
+    for (size_t layer = 0; layer < dw_results.size(); layer++) {
+        assert (dw_results[layer].size() == new_result.dw_results[layer].size());
+        for (size_t i = 0; i < dw_results[layer].size(); i++) {
+            assert (dw_results[layer][i].size() == new_result.dw_results[layer][i].size());
+            for (size_t j = 0; j < dw_results[layer][i].size(); j++) {
+                dw_results[layer][i][j] += new_result.dw_results[layer][i][j] * scale_factor;
+            }
+        }
+    }
+
+    assert (db_results.size() == new_result.db_results.size());
+    for (size_t layer = 0; layer < db_results.size(); layer++) {
+        assert (db_results[layer].size() == new_result.db_results[layer].size());
+        for (size_t i = 0; i < db_results[layer].size(); i++) {
+            db_results[layer][i] += new_result.db_results[layer][i] * scale_factor;
+        }
+    }
+}
+
 NeuralNetwork::NeuralNetwork(std::vector<size_t> hidden_layer_sizes, initialization_func_t initialization_func,
                              activation_func_t activation_func, activation_func_deriv_t activation_func_deriv,
                              double alpha):
@@ -99,7 +134,7 @@ back_prop_output_t NeuralNetwork::back_prop(unsigned char expected_result, const
         dz_results[i] = dz_result;
     }
 
-    back_prop_output_t result;
+    back_prop_output_t result(hidden_layer_sizes);
 
     for (int i = 0; i < number_layers; i++) {
         std::vector<std::vector<double>> dw_result(weights[i].size(), std::vector<double> (weights[i][0].size(), 0));
@@ -109,8 +144,8 @@ back_prop_output_t NeuralNetwork::back_prop(unsigned char expected_result, const
                 dw_result[j][k] = dz_results[i][j] * forward_prop_output.a_results[i][k];
             }
         }
-        result.dw_results.push_back(dw_result);
-        result.db_results.push_back(dz_results[i]);
+        result.dw_results[i] = dw_result;
+        result.db_results[i] = dz_results[i];
     }
 
     return result;
