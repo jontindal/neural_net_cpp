@@ -23,20 +23,15 @@ back_prop_output_t::back_prop_output_t(const std::vector<size_t>& hidden_layer_s
 }
 
 void back_prop_output_t::add_new_result(const back_prop_output_t& new_result, double scale_factor) {
-    assert (dw_results.size() == new_result.dw_results.size());
     for (size_t layer = 0; layer < dw_results.size(); layer++) {
-        assert (dw_results[layer].size() == new_result.dw_results[layer].size());
         for (size_t i = 0; i < dw_results[layer].size(); i++) {
-            assert (dw_results[layer][i].size() == new_result.dw_results[layer][i].size());
             for (size_t j = 0; j < dw_results[layer][i].size(); j++) {
                 dw_results[layer][i][j] += new_result.dw_results[layer][i][j] * scale_factor;
             }
         }
     }
 
-    assert (db_results.size() == new_result.db_results.size());
     for (size_t layer = 0; layer < db_results.size(); layer++) {
-        assert (db_results[layer].size() == new_result.db_results[layer].size());
         for (size_t i = 0; i < db_results[layer].size(); i++) {
             db_results[layer][i] += new_result.db_results[layer][i] * scale_factor;
         }
