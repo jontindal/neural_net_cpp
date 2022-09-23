@@ -165,8 +165,6 @@ std::vector<double> NeuralNetwork::gradient_descent(const std::vector<training_d
 }
 
 std::vector<double> NeuralNetwork::cost_function_deriv(unsigned char expected_result, const std::vector<double>& actual_results) {
-    assert (expected_result < actual_results.size());
-
     std::vector<double> one_hot_expected_results(actual_results.size(), 0);
     one_hot_expected_results[expected_result] = 1;
 
