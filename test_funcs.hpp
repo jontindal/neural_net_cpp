@@ -2,7 +2,7 @@
 
 #include "neural_network.hpp"
 
-std::vector<double> get_input_pixels();
+std::vector<double> get_rand_input_pixels();
 
 forward_prop_output_t forward_prop(const std::vector<std::vector<std::vector<double>>> weights,
                                    const std::vector<std::vector<double>> biases,

@@ -5,7 +5,7 @@
 
 #include "activation_function.hpp"
 
-std::vector<double> get_input_pixels() {
+std::vector<double> get_rand_input_pixels() {
     std::vector<double> input_pixels(INPUT_SIZE);
 
     std::default_random_engine generator;

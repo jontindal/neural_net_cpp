@@ -41,7 +41,7 @@ TEST_CASE("test_layer_sizes") {
 }
 
 TEST_CASE("test_forward_prop") {
-    auto input_pixels = get_input_pixels();
+    auto input_pixels = get_rand_input_pixels();
 
     std::vector<size_t> layers;
 
@@ -61,7 +61,7 @@ TEST_CASE("test_forward_prop") {
 }
 
 TEST_CASE("test_back_prop") {
-    auto input_pixels = get_input_pixels();
+    auto input_pixels = get_rand_input_pixels();
 
     std::vector<size_t> layers;
 
