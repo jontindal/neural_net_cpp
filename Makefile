@@ -1,33 +1,75 @@
-CXX=g++
-CPPFLAGS=-g -Wall -D_GLIBCXX_DEBUG
-CPPRELEASEFLAGS=-O3 -DNDEBUG
+CXX = g++
+CXXFLAGS = -Wall
 
-SRCS=initialization_function.cpp activation_function.cpp data_reader.cpp neural_network.cpp test_funcs.cpp
-OBJS=$(subst .cpp,.o,$(SRCS))
+CXXDBGFLAGS = -g -D_GLIBCXX_DEBUG
+CXXRELFLAGS = -O3 -DNDEBUG
 
-all: main
+SRC_DIR = src
+INC_DIRS = inc
+DBGBUILDDIR = build/debug
+RELBUILDDIR = build/release
 
-release: CPPFLAGS=$(CPPRELEASEFLAGS)
-release: main
 
-main: $(OBJS) main.cpp
-	$(CXX) $(CPPFLAGS) -o $@ $^
+SRCS = \
+src/initialization_function.cpp \
+src/activation_function.cpp \
+src/data_reader.cpp \
+src/neural_network.cpp \
+src/test_funcs.cpp
 
-test: unit_tests
+INC_FLAGS = $(addprefix -I,$(INC_DIRS))
+
+DBGOBJS = $(addprefix $(DBGBUILDDIR)/,$(notdir $(SRCS:.cpp=.o)))
+DBGDEPS = $(DBGOBJS:.o=.d)
+
+RELOBJS = $(addprefix $(RELBUILDDIR)/,$(notdir $(SRCS:.cpp=.o)))
+RELDEPS = $(RELOBJS:.o=.d)
+
+CXXFLAGS += $(INC_FLAGS) -MMD -MP
+
+.PHONY: all debug test release time clean
+
+all: debug
+
+
+debug: $(DBGBUILDDIR)/main
+
+test: $(DBGBUILDDIR)/unit_tests
 	./$<
 
-time: perf_tests
+$(DBGBUILDDIR)/main: $(DBGOBJS) src/main.cpp
+	$(CXX) $(CXXFLAGS) $(CXXDBGFLAGS) -o $@ $^
+
+$(DBGBUILDDIR)/unit_tests: $(DBGOBJS) src/unit_tests.cpp
+	$(CXX) $(CXXFLAGS) $(CXXDBGFLAGS) -o $@ $^
+
+$(DBGBUILDDIR)/%.o: $(SRC_DIR)/%.cpp | $(DBGBUILDDIR)
+	$(CXX) $(CXXFLAGS) $(CXXDBGFLAGS) -c $< -o $@
+
+$(DBGBUILDDIR):
+	mkdir --parents $@
+
+
+
+release: $(RELBUILDDIR)/main
+
+time: $(RELBUILDDIR)/perf_tests
 	./$<
 
-unit_tests: $(OBJS) unit_tests.cpp
-	$(CXX) $(CPPFLAGS) -o $@ $^
+$(RELBUILDDIR)/main: $(RELOBJS) src/main.cpp
+	$(CXX) $(CXXFLAGS) $(CXXRELFLAGS) -o $@ $^
 
-perf_tests: CPPFLAGS=$(CPPRELEASEFLAGS)
-perf_tests: $(OBJS) perf_tests.cpp
-	$(CXX) $(CPPFLAGS) -o $@ $^
+$(RELBUILDDIR)/perf_tests: $(RELOBJS) src/perf_tests.cpp
+	$(CXX) $(CXXFLAGS) $(CXXRELFLAGS) -o $@ $^
 
-%.o: %.cpp %.hpp
-	$(CXX) $(CPPFLAGS) -c $<
+$(RELBUILDDIR)/%.o: $(SRC_DIR)/%.cpp | $(RELBUILDDIR)
+	$(CXX) $(CXXFLAGS) $(CXXRELFLAGS) -c $< -o $@
+
+$(RELBUILDDIR):
+	mkdir --parents $@
+
 
 clean:
-	rm -f $(OBJS) main unit_tests
+	rm -rf $(DBGBUILDDIR) $(RELBUILDDIR)
+
+-include $(DBGDEPS) $(RELDEPS)
