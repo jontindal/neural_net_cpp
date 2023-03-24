@@ -1,8 +1,8 @@
 #include "neural_network.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <iostream>
-#include <algorithm>
 #include <numeric>
 #include <random>
 
@@ -38,7 +38,7 @@ void back_prop_output_t::add_new_result(const back_prop_output_t& new_result, do
     }
 }
 
-NeuralNetwork::NeuralNetwork(std::vector<size_t> hidden_layer_sizes, initialization_func_t initialization_func,
+NeuralNetwork::NeuralNetwork(const std::vector<size_t>& hidden_layer_sizes, initialization_func_t initialization_func,
                              activation_func_t activation_func, activation_func_deriv_t activation_func_deriv,
                              double alpha):
                              number_layers(hidden_layer_sizes.size() + 1),
@@ -64,11 +64,11 @@ NeuralNetwork::NeuralNetwork(std::vector<size_t> hidden_layer_sizes, initializat
     }
 }
 
-const std::vector<std::vector<std::vector<double>>> NeuralNetwork::get_weights() {
+const std::vector<std::vector<std::vector<double>>>& NeuralNetwork::get_weights() {
     return weights;
 }
 
-const std::vector<std::vector<double>> NeuralNetwork::get_biases() {
+const std::vector<std::vector<double>>& NeuralNetwork::get_biases() {
     return biases;
 }
 
@@ -134,7 +134,7 @@ back_prop_output_t NeuralNetwork::back_prop(unsigned char expected_result, const
     return result;
 }
 
-std::vector<double> NeuralNetwork::gradient_descent(const std::vector<training_data_t> training_data,
+std::vector<double> NeuralNetwork::gradient_descent(const std::vector<training_data_t>& training_data,
                                                     unsigned long iterations,
                                                     bool print_progress) {
     std::vector<double> accuracies(iterations);
@@ -143,7 +143,7 @@ std::vector<double> NeuralNetwork::gradient_descent(const std::vector<training_d
         size_t correct_guesses = 0;
         back_prop_output_t avg_output(hidden_layer_sizes);
 
-        for (auto& data_point : training_data) {
+        for (const auto& data_point : training_data) {
             auto double_vector = to_double_vector(data_point.pixels);
             forward_prop_output_t forward_prop_output = forward_prop(double_vector);
             back_prop_output_t back_prop_output = back_prop(data_point.actual_value, double_vector, forward_prop_output);
@@ -154,7 +154,7 @@ std::vector<double> NeuralNetwork::gradient_descent(const std::vector<training_d
         }
 
         update_params(avg_output);
-        accuracies[i] = (double) correct_guesses / training_data.size();
+        accuracies[i] = static_cast<double>(correct_guesses) / training_data.size();
 
         if ((i % 20 == 0) && print_progress) {
             std::cout << "Accuracy on iteration " << i << ": " << accuracies[i] << "\n";

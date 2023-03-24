@@ -94,9 +94,9 @@ static std::vector<std::vector<double>> get_all_dz_results(const size_t no_layer
     return dz_results;
 }
 
-back_prop_output_t back_prop(const unsigned char expected_result, const forward_prop_output_t forward_prop_output,
-                             const std::vector<size_t> hidden_layer_sizes,
-                             const std::vector<std::vector<std::vector<double>>> weights) {
+back_prop_output_t back_prop(const unsigned char expected_result, const forward_prop_output_t& forward_prop_output,
+                             const std::vector<size_t>& hidden_layer_sizes,
+                             const std::vector<std::vector<std::vector<double>>>& weights) {
 
     const size_t no_layers = weights.size();
     assert (forward_prop_output.z_results.size() == no_layers + 1);

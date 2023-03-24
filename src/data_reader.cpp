@@ -1,18 +1,19 @@
 #include "data_reader.hpp"
 
+#include <climits>
 #include <sstream>
 
 std::vector<double> to_double_vector(const std::vector<unsigned char>& input) {
     std::vector<double> result(input.size());
 
     for (size_t i = 0; i < input.size(); i++) {
-        result[i] = (double) input[i] / 255;
+        result[i] = static_cast<double>(input[i]) / UCHAR_MAX;
     }
 
     return result;
 }
 
-DataReader::DataReader(std::string file_name) {
+DataReader::DataReader(const std::string& file_name) {
     data_file.open(file_name, std::ios::in);
 
     std::string first_line;

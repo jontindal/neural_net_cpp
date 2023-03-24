@@ -13,7 +13,7 @@ std::vector<double> to_double_vector(const std::vector<unsigned char>& input);
 
 class DataReader {
     public:
-        DataReader(std::string file_name);
+        DataReader(const std::string &file_name);
 
         training_data_t get_data_point();
 

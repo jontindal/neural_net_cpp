@@ -27,13 +27,13 @@ struct back_prop_output_t {
 
 class NeuralNetwork {
     public:
-        NeuralNetwork(std::vector<size_t> hidden_layer_sizes, initialization_func_t initialization_func,
+        NeuralNetwork(const std::vector<size_t>& hidden_layer_sizes, initialization_func_t initialization_func,
                       activation_func_t activation_func, activation_func_deriv_t activation_func_deriv,
                       double alpha);
 
-        const std::vector<std::vector<std::vector<double>>> get_weights();
+        const std::vector<std::vector<std::vector<double>>>& get_weights();
 
-        const std::vector<std::vector<double>> get_biases();
+        const std::vector<std::vector<double>>& get_biases();
 
         forward_prop_output_t forward_prop(const std::vector<double>& input_pixels);
 
@@ -42,10 +42,11 @@ class NeuralNetwork {
         back_prop_output_t back_prop(unsigned char expected_result, const std::vector<double>& input_pixels,
                                      const forward_prop_output_t& forward_prop_output);
 
-        std::vector<double> gradient_descent(const std::vector<training_data_t> training_data, unsigned long iterations, bool print_progress = false);
+        std::vector<double> gradient_descent(const std::vector<training_data_t>& training_data,
+                                             unsigned long iterations, bool print_progress = false);
 
     private:
-        std::vector<double> cost_function_deriv(unsigned char expected_result, const std::vector<double>& actual_results);
+        static std::vector<double> cost_function_deriv(unsigned char expected_result, const std::vector<double>& actual_results);
 
         void update_params(const back_prop_output_t& back_prop_output);
 
