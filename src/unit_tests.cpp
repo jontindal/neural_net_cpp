@@ -74,7 +74,7 @@ TEST_CASE("test_back_prop") {
 
     forward_prop_output_t forward_prop_output = neural_net.forward_prop(input_pixels);
 
-    back_prop_output_t results = neural_net.back_prop(3, input_pixels, forward_prop_output);
+    back_prop_output_t results = neural_net.back_prop(3, forward_prop_output);
 
     back_prop_output_t other_results = back_prop(3, forward_prop_output, layers, neural_net.get_weights());
 

@@ -100,7 +100,7 @@ unsigned char NeuralNetwork::get_best_guess(const std::vector<double>& forward_p
     return std::max_element(forward_prop_final_result.begin(), forward_prop_final_result.end()) - forward_prop_final_result.begin();
 }
 
-back_prop_output_t NeuralNetwork::back_prop(unsigned char expected_result, const std::vector<double>& input_pixels,
+back_prop_output_t NeuralNetwork::back_prop(unsigned char expected_result,
                                             const forward_prop_output_t& forward_prop_output) {
 
     std::vector<std::vector<double>> dz_results(number_layers);
@@ -146,7 +146,7 @@ std::vector<double> NeuralNetwork::gradient_descent(const std::vector<training_d
         for (const auto& data_point : training_data) {
             auto double_vector = to_double_vector(data_point.pixels);
             forward_prop_output_t forward_prop_output = forward_prop(double_vector);
-            back_prop_output_t back_prop_output = back_prop(data_point.actual_value, double_vector, forward_prop_output);
+            back_prop_output_t back_prop_output = back_prop(data_point.actual_value, forward_prop_output);
 
             avg_output.add_new_result(back_prop_output, (1. / training_data.size()));
 

@@ -39,7 +39,7 @@ class NeuralNetwork {
 
         unsigned char get_best_guess(const std::vector<double>& forward_prop_final_result);
 
-        back_prop_output_t back_prop(unsigned char expected_result, const std::vector<double>& input_pixels,
+        back_prop_output_t back_prop(unsigned char expected_result,
                                      const forward_prop_output_t& forward_prop_output);
 
         std::vector<double> gradient_descent(const std::vector<training_data_t>& training_data,
